@@ -7,7 +7,7 @@ import (
 	"github.com/gnolang/gno/gnovm/stdlibs/std"
 )
 
-func Listener(client gnoclient.Client) error {
+func Run(client gnoclient.Client) error {
 	prevHeight, err := client.LatestBlockHeight()
 	if err != nil {
 		return err
