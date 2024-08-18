@@ -1,6 +1,8 @@
 package events
 
 import (
+	"fmt"
+
 	"github.com/gnolang/gno/gnovm/stdlibs/std"
 	"github.com/lennyvong/gnobet/off-chain-agent/pkg/core/sports"
 	"github.com/lennyvong/gnobet/off-chain-agent/pkg/core/sports/football"
@@ -23,5 +25,6 @@ func NewEventHandler() (*EventHandler, error) {
 	}, nil
 }
 
-func eventHandler(event std.GnoEvent) {
+func (e *EventHandler) HandleEvent(event std.GnoEvent) {
+	fmt.Println("Handling event: ", event)
 }

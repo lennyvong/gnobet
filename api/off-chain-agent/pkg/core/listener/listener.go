@@ -5,9 +5,10 @@ import (
 
 	"github.com/gnolang/gno/gno.land/pkg/gnoclient"
 	"github.com/gnolang/gno/gnovm/stdlibs/std"
+	"github.com/lennyvong/gnobet/off-chain-agent/pkg/core/events"
 )
 
-func Run(client gnoclient.Client) error {
+func Run(client gnoclient.Client, eventHandler events.EventHandler) error {
 	prevHeight, err := client.LatestBlockHeight()
 	if err != nil {
 		return err
@@ -32,7 +33,7 @@ func Run(client gnoclient.Client) error {
 			for _, tx := range blockResult.Results.DeliverTxs {
 				for _, event := range tx.Events {
 					if event.(std.GnoEvent).PkgPath == "gno.land/r/demo/gnobet" {
-						// eventsHandler(event.(std.GnoEvent))
+						eventHandler.HandleEvent(event.(std.GnoEvent))
 					}
 				}
 			}

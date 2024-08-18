@@ -7,10 +7,11 @@ import (
 	rpcclient "github.com/gnolang/gno/tm2/pkg/bft/rpc/client"
 	"github.com/gnolang/gno/tm2/pkg/crypto/keys"
 	"github.com/joho/godotenv"
+	"github.com/lennyvong/gnobet/off-chain-agent/pkg/core/events"
 	"github.com/lennyvong/gnobet/off-chain-agent/pkg/core/listener"
 )
 
-func setup() gnoclient.Client {
+func setup() (gnoclient.Client, error) {
 	keybase, _ := keys.NewKeyBaseFromDir("/Users/lennyvongphouthone/Library/Application Support/gno")
 
 	signer := gnoclient.SignerFromKeybase{
@@ -21,7 +22,7 @@ func setup() gnoclient.Client {
 	}
 	rpc, err := rpcclient.NewHTTPClient("http://127.0.0.1:26657")
 	if err != nil {
-		panic(err)
+		return gnoclient.Client{}, err
 	}
 
 	client := gnoclient.Client{
@@ -29,7 +30,7 @@ func setup() gnoclient.Client {
 		RPCClient: rpc,
 	}
 	log.Println("Signer and RPCClient initialized")
-	return client
+	return client, nil
 }
 
 func main() {
@@ -39,9 +40,15 @@ func main() {
 		log.Fatal("error: failed to load the env file")
 	}
 
-	client := setup()
-
-	err = listener.Run(client)
+	client, err := setup()
+	if err != nil {
+		log.Fatal(err)
+	}
+	eventHandler, err := events.NewEventHandler()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = listener.Run(client, *eventHandler)
 	if err != nil {
 		log.Fatal(err)
 	}
