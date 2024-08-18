@@ -53,7 +53,7 @@ func RequestMatchDate(date string) {
 	); err != nil {
 		panic(err)
 	}
-	std.Emit("MatchDate", "sport", "foot", "date", date)
+	std.Emit("RequestMatchesDate", "sport", "football", "date", date)
 }
 
 // GnorkleEntrypoint is the entrypoint for the oracle by the off-chain agent

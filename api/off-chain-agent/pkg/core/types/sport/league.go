@@ -1,8 +1,8 @@
 package sport
 
 type League struct {
-	ID      string `json:"id"`
+	ID      int    `json:"id"`
 	Name    string `json:"name"`
 	Country string `json:"country"`
-	Season  string `json:"season"`
+	Season  int    `json:"season"`
 }

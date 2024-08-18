@@ -1,0 +1,4 @@
+package oracle
+
+func Entrypoint() {
+}

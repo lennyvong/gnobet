@@ -30,17 +30,19 @@ func NewSport() (*Sport, error) {
 }
 
 type GetFixturesResponse struct {
-	Fixture sport.Fixture `json:"fixture"`
-	League  sport.League
-	Teams   struct {
-		HomeTeam sport.Team `json:"home"`
-		AwayTeam sport.Team `json:"away"`
+	Response []struct {
+		Fixture sport.Fixture `json:"fixture"`
+		League  sport.League  `json:"league"`
+		Teams   struct {
+			HomeTeam sport.Team `json:"home"`
+			AwayTeam sport.Team `json:"away"`
+		} `json:"teams"`
 	}
 }
 
 func (s *Sport) GetMatchesAtDate(date string) ([]sport.Match, error) {
 	res := []sport.Match{}
-	getMatchRes, err := utils.GetFromJsonReq[[]GetFixturesResponse](s.ApiUrl+"/fixtures?date="+date+"&league=39&season2024", "GET", "",
+	getMatchRes, err := utils.GetFromJsonReq[GetFixturesResponse](s.ApiUrl+"/fixtures?date="+date+"&league=39&season=2024", utils.GET, "",
 		[]utils.Header{
 			{
 				Key:   "x-rapidapi-key",
@@ -51,10 +53,10 @@ func (s *Sport) GetMatchesAtDate(date string) ([]sport.Match, error) {
 				Value: "api-football-v1.p.rapidapi.com",
 			},
 		}, "")
-	if err != nil || getMatchRes == nil {
+	if err != nil {
 		return nil, fmt.Errorf("failed to get matches: %w", err)
 	}
-	for _, match := range getMatchRes {
+	for _, match := range getMatchRes.Response {
 		res = append(res, sport.Match{
 			HomeTeam: match.Teams.HomeTeam,
 			AwayTeam: match.Teams.AwayTeam,
