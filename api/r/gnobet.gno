@@ -3,10 +3,10 @@ package gnobet
 import (
 	"std"
 
-	"gno.land/p/demo/avl"
-	"gno.land/p/demo/gnorkle/feeds/static"
+	"gno.land/p/demo/gnorkle/feeds/continious"
 	"gno.land/p/demo/gnorkle/gnorkle"
 	"gno.land/p/demo/gnorkle/message"
+  	"gno.land/p/demo/ufmt"
 )
 
 var (
@@ -14,22 +14,26 @@ var (
 	oracle 	 *gnorkle.Instance
 	postHandler = &postGnorkleMessageHandler{}
 
-	matchResult = avl.NewTree()
+	matches = &[]MatchData{}
 )
 
 type postGnorkleMessageHandler struct {}
 
 // Handle handles the gnorkle message
 func (h postGnorkleMessageHandler) Handle(i *gnorkle.Instance, funcType message.FuncType, feed gnorkle.Feed) error {
-	if funcType != message.FuncTypeIngest {
+	if funcType != message.FuncTypeCommit && funcType != message.FuncTypeIngestCommit {
+    ufmt.Println("funcType != message.FuncTypeCommit")
 		return nil
 	}
 
-	_, _, consumable := feed.Value()
+	result, _, consumable := feed.Value()
 	if !consumable {
+    ufmt.Println("!consumable")
 		return nil
 	}
 
+  ufmt.Println("result.String : ", result.String[0].(MatchData))
+  // matches = append(matches,result.String.(MatchData))
 	return nil
 }
 
@@ -45,7 +49,7 @@ func RequestMatchDate(date string) {
 		panic(err)
 	}
 	if err := oracle.AddFeeds(
-		static.NewSingleValueFeed(
+		continious.NewSingleValueFeed(
 			date,
 			"string",
 			&matchDateTask{date},
@@ -64,4 +68,8 @@ func GnorkleEntrypoint(message string) string {
 	}
 
 	return result
+}
+
+func GetMatches() []MatchData {
+  return *matches
 }

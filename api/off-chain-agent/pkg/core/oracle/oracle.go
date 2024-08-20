@@ -1,4 +1,0 @@
-package oracle
-
-func Entrypoint() {
-}
