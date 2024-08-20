@@ -85,15 +85,20 @@ const WalletDrawer: FC = () => {
                 });
               }}
               cursor="pointer"
-              color="gray.700"
+              color="gray.100"
               _hover={{
-                color: "gray.600",
+                color: "gray.200",
               }}
             >
               <IoCopy />
             </Box>
           </HStack>
-          <Button size="sm" onClick={() => setAccount(null)}>
+          <Button
+            bg="gray.600"
+            _hover={{ bg: "gray.500" }}
+            size="sm"
+            onClick={() => setAccount(null)}
+          >
             Disconnect Wallet
           </Button>
         </VStack>
