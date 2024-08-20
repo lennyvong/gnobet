@@ -14,13 +14,13 @@ type MatchData struct {
   	League League `json:"league"`
   	DateTime string `json:"date_time"`
 	Scores struct {
-		HalfTime Score
-		FullTime Score
-		ExtraTime Score
-		Penalties Score
-	}
-	Status Status
-	Bets []Bet
+		HalfTime Score `json:"half_time"`
+		FullTime Score `json:"full_time"`
+		ExtraTime Score `json:"extra_time"`
+		Penalties Score `json:"penalties"`
+	} `json:"scores"`
+	Status Status `json:"status"`
+	Bets []Bet `json:"bets"`
 }
 
 func MatchDataFromJSON(data *json.Node, id int) (MatchData, error) {
@@ -65,9 +65,9 @@ const (
 )
 
 type Team struct {
-	ID int
-	Name string
-	League string
+	ID int `json:"id"`
+	Name string `json:"name"`
+	League string `json:"league"`
 }
 
 func TeamFromJSON(data *json.Node) (Team, error) {
@@ -100,9 +100,9 @@ type Score struct {
 }
 
 type Bet struct {
-	Bettor std.Address
-	ID int
-	Amount int
+	Bettor std.Address `json:"bettor"`
+	ID int `json:"id"`
+	Amount int `json:"amount"`
 }
 
 type League struct {
