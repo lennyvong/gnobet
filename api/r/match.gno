@@ -103,7 +103,15 @@ type Bet struct {
 	Bettor std.Address `json:"bettor"`
 	ID int `json:"id"`
 	Amount int `json:"amount"`
+	Status BetStatus `json:"status"`
 }
+
+type BetStatus string
+
+const (
+	Running BetStatus = "running"
+	Finish BetStatus = "finish"
+)
 
 type League struct {
   ID int `json:"id"`

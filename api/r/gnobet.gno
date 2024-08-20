@@ -7,8 +7,8 @@ import (
 	"gno.land/p/demo/gnorkle/feeds/continious"
 	"gno.land/p/demo/gnorkle/gnorkle"
 	"gno.land/p/demo/gnorkle/message"
-  "gno.land/p/demo/ufmt"
-  "gno.land/p/demo/json"
+  	"gno.land/p/demo/ufmt"
+  	"gno.land/p/demo/json"
 )
 
 var (
@@ -90,6 +90,29 @@ func GnorkleEntrypoint(message string) string {
 	}
 
 	return result
+}
+
+func Test() string {
+	bets := &[]Bet{}
+
+	for _, match := range *matches {
+		if match.ID == 0 {
+			bets = &match.Bets
+		}
+	}
+	return (*bets)[0].Bettor.String()
+}
+
+// BetOnAMatch allows a user to bet on a match
+func BetOnAMatch(matchID int) {
+	coinSent := std.GetOrigSend() // get Coins sent with call
+	caller := std.GetOrigCaller() // get tx sender
+
+	(*matches)[matchID].Bets = append((*matches)[matchID].Bets, Bet{
+		Bettor: caller,
+		ID:     len((*matches)[matchID].Bets),
+		Amount: int(coinSent.AmountOf("ugnot")),
+	})
 }
 
 func GetMatches() string {
