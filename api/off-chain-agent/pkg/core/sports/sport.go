@@ -1,9 +1,9 @@
 package sports
 
 import (
-	"github.com/lennyvong/gnobet/off-chain-agent/pkg/core/types/sport"
+	"github.com/lennyvong/gnobet/off-chain-agent/pkg/core/types/gnorkle"
 )
 
 type Sport interface {
-	GetMatchesAtDate(date string) ([]sport.Match, error)
+	GetMatchesAtDate(date string) ([]gnorkle.MatchData, error)
 }

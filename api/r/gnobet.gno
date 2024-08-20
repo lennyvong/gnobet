@@ -6,7 +6,8 @@ import (
 	"gno.land/p/demo/gnorkle/feeds/continious"
 	"gno.land/p/demo/gnorkle/gnorkle"
 	"gno.land/p/demo/gnorkle/message"
-  	"gno.land/p/demo/ufmt"
+  "gno.land/p/demo/ufmt"
+  "gno.land/p/demo/json"
 )
 
 var (
@@ -31,8 +32,28 @@ func (h postGnorkleMessageHandler) Handle(i *gnorkle.Instance, funcType message.
     ufmt.Println("!consumable")
 		return nil
 	}
-
-  ufmt.Println("result.String : ", result.String[0].(MatchData))
+  decodedData, err := json.Unmarshal([]byte(result.String))
+   if err != nil {
+     ufmt.Println("error decoding data")
+     return nil
+   }
+   ufmt.Println("decodedData.Size(): ", decodedData.Size())
+   for i := 0; i < decodedData.Size(); i++ {
+	 node, err := decodedData.GetIndex(i)
+	 if err != nil {
+	   ufmt.Println("error getting node")
+	   return nil
+	 }
+	 ufmt.Println("CACA")
+	 test, err := MatchDataFromJSON(node, len(*matches))
+	 if err != nil {
+	   ufmt.Println("error decoding data")
+	   return nil
+	 }
+	 ufmt.Println("ICI")
+	 ufmt.Println("test ", i, ":", test.HomeTeam.Name)
+	 *matches = append(*matches, test)
+   }
   // matches = append(matches,result.String.(MatchData))
 	return nil
 }

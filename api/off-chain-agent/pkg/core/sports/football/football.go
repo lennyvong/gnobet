@@ -3,7 +3,9 @@ package football
 import (
 	"fmt"
 	"os"
+	"strconv"
 
+	"github.com/lennyvong/gnobet/off-chain-agent/pkg/core/types/gnorkle"
 	"github.com/lennyvong/gnobet/off-chain-agent/pkg/core/types/sport"
 	"github.com/lennyvong/gnobet/off-chain-agent/pkg/core/utils"
 )
@@ -40,8 +42,8 @@ type GetFixturesResponse struct {
 	}
 }
 
-func (s *Sport) GetMatchesAtDate(date string) ([]sport.Match, error) {
-	res := []sport.Match{}
+func (s *Sport) GetMatchesAtDate(date string) ([]gnorkle.MatchData, error) {
+	res := []gnorkle.MatchData{}
 	getMatchRes, err := utils.GetFromJsonReq[GetFixturesResponse](s.ApiUrl+"/fixtures?date="+date+"&league=39&season=2024", utils.GET, "",
 		[]utils.Header{
 			{
@@ -53,16 +55,30 @@ func (s *Sport) GetMatchesAtDate(date string) ([]sport.Match, error) {
 				Value: "api-football-v1.p.rapidapi.com",
 			},
 		}, "")
+	fmt.Println(getMatchRes)
+	fmt.Println("id : ", getMatchRes.Response[0].League.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get matches: %w", err)
 	}
 	for _, match := range getMatchRes.Response {
-		res = append(res, sport.Match{
-			HomeTeam: match.Teams.HomeTeam,
-			AwayTeam: match.Teams.AwayTeam,
-			League:   match.League,
+		res = append(res, gnorkle.MatchData{
+			HomeTeam: gnorkle.Team{
+				ID:   strconv.Itoa(match.Teams.HomeTeam.ID),
+				Name: match.Teams.HomeTeam.Name,
+			},
+			AwayTeam: gnorkle.Team{
+				ID:   strconv.Itoa(match.Teams.AwayTeam.ID),
+				Name: match.Teams.AwayTeam.Name,
+			},
+			League: gnorkle.League{
+				ID:      strconv.Itoa(match.League.ID),
+				Name:    match.League.Name,
+				Country: match.League.Country,
+				Season:  strconv.Itoa(match.League.Season),
+			},
 			DateTime: match.Fixture.Date,
 		})
 	}
+	fmt.Printf("res : %v\n", res)
 	return res, nil
 }
