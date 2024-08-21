@@ -55,8 +55,6 @@ func (s *Sport) GetMatchesAtDate(date string) ([]gnorkle.MatchData, error) {
 				Value: "api-football-v1.p.rapidapi.com",
 			},
 		}, "")
-	fmt.Println(getMatchRes)
-	fmt.Println("id : ", getMatchRes.Response[0].League.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get matches: %w", err)
 	}
@@ -79,6 +77,5 @@ func (s *Sport) GetMatchesAtDate(date string) ([]gnorkle.MatchData, error) {
 			DateTime: match.Fixture.Date,
 		})
 	}
-	fmt.Printf("res : %v\n", res)
 	return res, nil
 }

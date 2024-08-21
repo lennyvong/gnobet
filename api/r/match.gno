@@ -20,31 +20,35 @@ type MatchData struct {
 		Penalties Score `json:"penalties"`
 	} `json:"scores"`
 	Status Status `json:"status"`
+	Winner MatchWinner `json:"winner"`
 	Bets []Bet `json:"bets"`
 }
 
-func MatchDataFromJSON(data *json.Node, id int) (MatchData, error) {
-	ufmt.Println("MatchDataFromJSON")
+type MatchWinner string
+
+const (
+	HomeTeam MatchWinner = "HomeTeam"
+	AwayTeam MatchWinner = "AwayTeam"
+	Draw MatchWinner = "Draw"
+)
+
+func matchDataFromJSON(data *json.Node, id int) (MatchData, error) {
 	matchDateTime, err := data.MustKey("date_time").Value()
 	if err != nil {
 		return MatchData{}, ufmt.Errorf("error getting date_time: %v", err)
 	}
-	ufmt.Println("HomeTeam")
-	homeTeam, err := TeamFromJSON(data.MustKey("home_team"))
+	homeTeam, err := teamFromJSON(data.MustKey("home_team"))
 	if err != nil {
 		return MatchData{}, ufmt.Errorf("error getting home_team: %v", err)
 	}
-	ufmt.Println("AwayTeam")
-	awayTeam, err := TeamFromJSON(data.MustKey("away_team"))
+	awayTeam, err := teamFromJSON(data.MustKey("away_team"))
 	if err != nil {
 		return MatchData{}, ufmt.Errorf("error getting away_team: %v", err)
 	}
-	ufmt.Println("League")
-	league, err := LeagueFromJSON(data.MustKey("league"))
+	league, err := leagueFromJSON(data.MustKey("league"))
 	if err != nil {
 		return MatchData{}, ufmt.Errorf("error getting league: %v", err)
 	}
-	ufmt.Println("MatchDataFromJSONEND")
 	return MatchData{
 		ID: id,
 		HomeTeam: homeTeam,
@@ -70,19 +74,15 @@ type Team struct {
 	League string `json:"league"`
 }
 
-func TeamFromJSON(data *json.Node) (Team, error) {
-	ufmt.Println("TeamFromJSON")
+func teamFromJSON(data *json.Node) (Team, error) {
 	teamID, err := data.MustKey("id").Value()
 	if err != nil {
 		return Team{}, err
 	}
-	ufmt.Println("1")
 	teamIDInt, err := strconv.Atoi(teamID.(string))
 	if err != nil {
-	ufmt.Println("1")
 		return Team{}, err
 	}
-	ufmt.Println("2")
 	teamName, err := data.MustKey("name").Value()
 	if err != nil {
 		return Team{}, err
@@ -103,7 +103,16 @@ type Bet struct {
 	Bettor std.Address `json:"bettor"`
 	ID int `json:"id"`
 	Amount int `json:"amount"`
+	Bet string `json:"bet"`
+	Status BetStatus `json:"status"`
 }
+
+type BetStatus string
+
+const (
+	Running BetStatus = "running"
+	Finish BetStatus = "finish"
+)
 
 type League struct {
   ID int `json:"id"`
@@ -112,17 +121,15 @@ type League struct {
   Season string `json:"season"`
 }
 
-func LeagueFromJSON(data *json.Node) (League, error) {
+func leagueFromJSON(data *json.Node) (League, error) {
   leagueID, err := data.MustKey("id").Value()
   if err != nil {
 	return League{}, err
   }
-  ufmt.Println("leagueID: ", leagueID)
   leagueIDInt, err := strconv.Atoi(leagueID.(string))
   if err != nil {
 	return League{}, err
   }
-  ufmt.Println("leagueIDInt: ", leagueIDInt)
   leagueName, err := data.MustKey("name").Value()
   if err != nil {
 	return League{}, err
