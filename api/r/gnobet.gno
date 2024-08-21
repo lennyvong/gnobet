@@ -38,22 +38,18 @@ func (h postGnorkleMessageHandler) Handle(i *gnorkle.Instance, funcType message.
      ufmt.Println("error decoding data")
      return nil
    }
-   ufmt.Println("decodedData.Size(): ", decodedData.Size())
    for i := 0; i < decodedData.Size(); i++ {
 	 node, err := decodedData.GetIndex(i)
 	 if err != nil {
 	   ufmt.Println("error getting node")
 	   return nil
 	 }
-	 ufmt.Println("CACA")
-	 test, err := MatchDataFromJSON(node, len(*matches))
+	 matchFromJson, err := matchDataFromJSON(node, len(*matches))
 	 if err != nil {
 	   ufmt.Println("error decoding data")
 	   return nil
 	 }
-	 ufmt.Println("ICI")
-	 ufmt.Println("test ", i, ":", test.HomeTeam.Name)
-	 *matches = append(*matches, test)
+	 *matches = append(*matches, matchFromJson)
    }
   // matches = append(matches,result.String.(MatchData))
 	return nil
@@ -92,19 +88,8 @@ func GnorkleEntrypoint(message string) string {
 	return result
 }
 
-func Test() string {
-	bets := &[]Bet{}
-
-	for _, match := range *matches {
-		if match.ID == 0 {
-			bets = &match.Bets
-		}
-	}
-	return (*bets)[0].Bettor.String()
-}
-
 // BetOnAMatch allows a user to bet on a match
-func BetOnAMatch(matchID int) {
+func BetOnAMatch(matchID int, bet MatchWinner) {
 	coinSent := std.GetOrigSend() // get Coins sent with call
 	caller := std.GetOrigCaller() // get tx sender
 
@@ -112,7 +97,90 @@ func BetOnAMatch(matchID int) {
 		Bettor: caller,
 		ID:     len((*matches)[matchID].Bets),
 		Amount: int(coinSent.AmountOf("ugnot")),
+		Bet:   string(bet),
 	})
+}
+
+func ApplicateBet(matchID int) error {
+	realmAddr := std.CurrentRealm().Addr()
+	banker := std.GetBanker(std.BankerTypeOrigSend)
+
+
+	if (*matches)[matchID].Status != Finished {
+		return ufmt.Errorf("match not finished")
+	}
+	for _, bet := range (*matches)[matchID].Bets {
+		if bet.Bet == string((*matches)[matchID].Winner) {
+			banker.SendCoins(realmAddr,bet.Bettor, std.Coins{std.NewCoin("ugnot", int64(bet.Amount))})
+		}
+	}
+	return nil
+}
+
+func GetMatch(matchID int) string {
+	match := (*matches)[matchID]
+	betsJson := json.ArrayNode("", []*json.Node{})
+
+	for _, bet := range match.Bets {
+		betJson := json.ObjectNode("", map[string]*json.Node{
+			"bettor":     json.StringNode("bettor", bet.Bettor.String()),
+			"id": json.StringNode("id", strconv.Itoa(bet.ID)),
+			"amout":  json.StringNode("amount", strconv.Itoa(bet.Amount)),
+			"bet": json.StringNode("bet", bet.Bet),
+			"status": json.StringNode("status", string(bet.Status)),
+		})
+		betsJson.AppendArray(betJson)
+	}
+	homeTeamJson := json.ObjectNode("", map[string]*json.Node{
+		"id":    json.StringNode("id", strconv.Itoa(match.HomeTeam.ID)),
+		"name":   json.StringNode("name", match.HomeTeam.Name),
+		"league": json.StringNode("league", match.HomeTeam.League),
+	})
+	awayTeamJson := json.ObjectNode("", map[string]*json.Node{
+		"id":    json.StringNode("id", strconv.Itoa(match.AwayTeam.ID)),
+		"name":   json.StringNode("name", match.AwayTeam.Name),
+		"league": json.StringNode("league", match.AwayTeam.League),
+	})
+	leagueJson := json.ObjectNode("", map[string]*json.Node{
+		"id":    json.StringNode("id", strconv.Itoa(match.League.ID)),
+		"name":   json.StringNode("name", match.League.Name),
+		"country": json.StringNode("country", match.League.Country),
+		"season": json.StringNode("season", match.League.Season),
+	})
+	scoresJson := json.ObjectNode("", map[string]*json.Node{
+		"half_time": json.ObjectNode("", map[string]*json.Node{
+			"home": json.StringNode("home", strconv.Itoa(match.Scores.HalfTime.Home)),
+			"away": json.StringNode("away", strconv.Itoa(match.Scores.HalfTime.Away)),
+		}),
+		"full_time": json.ObjectNode("", map[string]*json.Node{
+			"home": json.StringNode("home", strconv.Itoa(match.Scores.FullTime.Home)),
+			"away": json.StringNode("away", strconv.Itoa(match.Scores.FullTime.Away)),
+		}),
+		"extra_time": json.ObjectNode("", map[string]*json.Node{
+			"home": json.StringNode("home", strconv.Itoa(match.Scores.ExtraTime.Home)),
+			"away": json.StringNode("away", strconv.Itoa(match.Scores.ExtraTime.Away)),
+		}),
+		"penalties": json.ObjectNode("", map[string]*json.Node{
+			"home": json.StringNode("home", strconv.Itoa(match.Scores.Penalties.Home)),
+			"away": json.StringNode("away", strconv.Itoa(match.Scores.Penalties.Away)),
+		}),
+	})
+	matchJson := json.ObjectNode("", map[string]*json.Node{
+		"id":          json.StringNode("id", strconv.Itoa(match.ID)),
+		"home_team":   homeTeamJson,
+		"away_team":   awayTeamJson,
+		"league":      leagueJson,
+		"date_time":   json.StringNode("date_time", match.DateTime),
+		"scores": 	scoresJson,
+		"status": 	json.StringNode("status", string(match.Status)),
+		"bets": 	betsJson,
+	})
+	encoded, err := json.Marshal(matchJson)
+	if err != nil {
+		panic(ufmt.Errorf("error: %v", err))
+	}
+
+	return string(encoded)
 }
 
 func GetMatches() string {
@@ -124,6 +192,8 @@ func GetMatches() string {
 				"bettor":     json.StringNode("bettor", bet.Bettor.String()),
 				"id": json.StringNode("id", strconv.Itoa(bet.ID)),
 				"amout":  json.StringNode("amount", strconv.Itoa(bet.Amount)),
+				"bet": json.StringNode("bet", bet.Bet),
+				"status": json.StringNode("status", string(bet.Status)),
 			})
 			betsJson.AppendArray(betJson)
 		}

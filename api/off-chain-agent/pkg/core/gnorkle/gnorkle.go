@@ -6,6 +6,7 @@ import (
 
 	"github.com/gnolang/gno/gno.land/pkg/gnoclient"
 	"github.com/lennyvong/gnobet/off-chain-agent/pkg/core/onchain"
+	log "github.com/sirupsen/logrus"
 )
 
 type GnorkleCommand string
@@ -17,7 +18,7 @@ const (
 )
 
 func Entrypoint[T any](cmd GnorkleCommand, id string, data T, pkgPath string, funcName string) error {
-	fmt.Println("Sending data by using GnorkleEntrypoint")
+	log.Info("Sending gnorkle transaction")
 	signerInfo, err := onchain.Signer.Info()
 	if err != nil {
 		return err
@@ -67,6 +68,6 @@ func Entrypoint[T any](cmd GnorkleCommand, id string, data T, pkgPath string, fu
 	if err != nil {
 		return err
 	}
-	fmt.Println("res : ", res)
+	log.Info("Gnorkle transaction sent: ", res)
 	return nil
 }
