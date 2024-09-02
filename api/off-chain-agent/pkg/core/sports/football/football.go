@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/lennyvong/gnobet/off-chain-agent/pkg/core/types/gnorkle"
 	"github.com/lennyvong/gnobet/off-chain-agent/pkg/core/types/sport"
@@ -42,9 +43,18 @@ type GetFixturesResponse struct {
 	}
 }
 
-func (s *Sport) GetMatchesAtDate(date string) ([]gnorkle.MatchData, error) {
+func (s *Sport) GetMatchesAtDate(date string, day_interval string) ([]gnorkle.MatchData, error) {
+	dateTime, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse date: %w", err)
+	}
+	dayInternvalInt, err := strconv.Atoi(day_interval)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert day_interval to int: %w", err)
+	}
+	dateTime = dateTime.AddDate(0, 0, dayInternvalInt)
 	res := []gnorkle.MatchData{}
-	getMatchRes, err := utils.GetFromJsonReq[GetFixturesResponse](s.ApiUrl+"/fixtures?date="+date+"&league=39&season=2024", utils.GET, "",
+	getMatchRes, err := utils.GetFromJsonReq[GetFixturesResponse](s.ApiUrl+"/fixtures?from="+date+"&to="+dateTime.Format("2006-01-02")+"&league=39&season=2024", utils.GET, "",
 		[]utils.Header{
 			{
 				Key:   "x-rapidapi-key",

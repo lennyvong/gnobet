@@ -1,4 +1,4 @@
-package main
+package core
 
 import (
 	"log"
@@ -12,14 +12,14 @@ import (
 
 var Signer gnoclient.Signer
 
-func main() {
+func Main() {
 	// Load the .env file
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("error: failed to load the env file")
 	}
 
-	client, err := onchain.Run()
+	client, err := onchain.Setup()
 	if err != nil {
 		log.Fatal(err)
 	}

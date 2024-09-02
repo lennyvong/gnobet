@@ -32,7 +32,7 @@ func (e *EventHandler) HandleEvent(event std.GnoEvent) error {
 	switch event.Type {
 	case "RequestMatchesDate":
 		{
-			matches, err := e.sports[types.SportName(event.Attributes[0].Value)].GetMatchesAtDate(event.Attributes[1].Value)
+			matches, err := e.sports[types.SportName(event.Attributes[0].Value)].GetMatchesAtDate(event.Attributes[1].Value, event.Attributes[2].Value)
 			if err != nil {
 				return fmt.Errorf("failed to get matches: %w", err)
 			}
