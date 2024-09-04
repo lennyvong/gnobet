@@ -7,6 +7,7 @@ import { constants } from "./constants";
 import Home from "./pages";
 import { useProviderStore } from "./store";
 import HomeLayout from "./layouts/HomeLayout";
+import theme from "./theme";
 
 const queryClient = new QueryClient();
 
@@ -20,7 +21,7 @@ const App: FC = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ChakraProvider>
+      <ChakraProvider theme={theme}>
         <BrowserRouter>
           <Routes>
             <Route element={<HomeLayout />}>

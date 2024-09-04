@@ -80,18 +80,12 @@ const Navbar: FC = () => {
       <Drawer size="md" isOpen={isOpen} placement="left" onClose={onClose}>
         <DrawerOverlay />
         <DrawerContent onMouseLeave={onClose}>
-          <DrawerBody p="16px" bg="gray.100">
+          <DrawerBody p="16px" bg="gray.900">
             <WalletDrawer />
           </DrawerBody>
         </DrawerContent>
       </Drawer>
-      <VStack
-        spacing="24px"
-        w="100%"
-        h="100%"
-        background="gray.200"
-        align="start"
-      >
+      <VStack spacing="24px" w="100%" h="100%" align="start">
         <HStack w="100%">
           <Searchbar />
           <Box onMouseEnter={onOpen}>
@@ -101,7 +95,10 @@ const Navbar: FC = () => {
         <VStack align="start" w="100%">
           <Text fontWeight="bold">Top competitions</Text>
           <Card w="100%" p="8px">
-            <VStack align="start" divider={<StackDivider />}>
+            <VStack
+              align="start"
+              divider={<StackDivider borderColor="gray.700" />}
+            >
               {topCompetitions.map(({ img, title }) => (
                 <HStack key={title}>
                   <Image src={img} alt={title} width="24px" height="24px" />
@@ -116,7 +113,11 @@ const Navbar: FC = () => {
         <VStack align="start" w="100%">
           <Text fontWeight="bold">Sports</Text>
           <Card w="100%">
-            <VStack align="start" divider={<StackDivider />} spacing={0}>
+            <VStack
+              align="start"
+              divider={<StackDivider borderColor="gray.700" />}
+              spacing={0}
+            >
               {sports.map(({ img, title, isAvailable }) => (
                 <HStack
                   transitionDuration="0.2s"
@@ -127,7 +128,7 @@ const Navbar: FC = () => {
                   _hover={
                     !isAvailable
                       ? { cursor: "not-allowed" }
-                      : { cursor: "pointer", bg: "gray.100" }
+                      : { cursor: "pointer", bg: "gray.900" }
                   }
                   key={title}
                 >

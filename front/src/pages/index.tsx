@@ -43,19 +43,9 @@ const fixtures = [
 
 const Home: FC = () => {
   return (
-    <SimpleGrid
-      columns={{ base: 1, xl: 2 }}
-      w="100%"
-      spacing="24px"
-      background="gray.200"
-    >
+    <SimpleGrid columns={{ base: 1, xl: 2 }} w="100%" spacing="24px">
       {fixtures.map((fixture) => (
-        <Card
-          p="12px"
-          bg="linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0) 100%)"
-          w="100%"
-          key={fixture.teamA}
-        >
+        <Card p="12px" bg="gray.700" w="100%" key={fixture.teamA}>
           <VStack w="100%" h="100%" justify="space-between">
             <HStack w="100%" justify="space-between">
               <HStack spacing={0}>
@@ -91,7 +81,7 @@ const Home: FC = () => {
             </VStack>
             <HStack w="100%">
               {fixture.bets.map((bet) => (
-                <Card bg="gold" align="center" w="100%" p="8px" key={bet}>
+                <Card bg="gray.800" align="center" w="100%" p="8px" key={bet}>
                   <Text fontWeight="bold">{bet}</Text>
                 </Card>
               ))}

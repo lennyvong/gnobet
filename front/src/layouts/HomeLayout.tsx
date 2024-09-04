@@ -14,7 +14,7 @@ import Navbar from "../components/Navbar";
 const HomeLayout: FC = () => {
   return (
     <HStack
-      background="gray.200"
+      background="gray.800"
       w="100%"
       h="100vh"
       align="start"
@@ -27,13 +27,13 @@ const HomeLayout: FC = () => {
         <Outlet />
       </Box>
       <Box maxW="400px" p="24px" w="100%" h="100%">
-        <Card w="100%" h="100%" borderRadius="12px">
+        <Card bg="gray.700" w="100%" h="100%" borderRadius="12px">
           <VStack
             p="12px"
             align="start"
             w="100%"
             h="100%"
-            divider={<StackDivider />}
+            divider={<StackDivider borderColor="gray.700" />}
           >
             <HStack>
               <Text fontSize="14px" fontWeight="semibold" userSelect="none">
@@ -51,7 +51,7 @@ const HomeLayout: FC = () => {
                 <Text fontWeight="bold">Possible gains</Text>
                 <Text fontWeight="bold">0 ugnot</Text>
               </HStack>
-              <Button background="red.500" color="white" w="100%">
+              <Button variant="primary" w="100%">
                 Bet
               </Button>
             </VStack>
