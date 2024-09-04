@@ -19,7 +19,7 @@ func main() {
 		log.Fatal("error: failed to load the env file")
 	}
 
-	client, err := onchain.Run()
+	client, err := onchain.Setup()
 	if err != nil {
 		log.Fatal(err)
 	}

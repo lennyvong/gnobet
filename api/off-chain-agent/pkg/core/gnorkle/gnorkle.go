@@ -33,7 +33,7 @@ func Entrypoint[T any](cmd GnorkleCommand, id string, data T, pkgPath string, fu
 	}
 	txCfg := gnoclient.BaseTxCfg{
 		GasFee:         "1000000ugnot",                 // gas price
-		GasWanted:      2000000,                        // gas limit
+		GasWanted:      20000000,                       // gas limit
 		AccountNumber:  accountRes.GetAccountNumber(),  // account ID
 		SequenceNumber: accountRes.GetSequence(),       // account nonce
 		Memo:           "This is a cool how-to guide!", // transaction memo

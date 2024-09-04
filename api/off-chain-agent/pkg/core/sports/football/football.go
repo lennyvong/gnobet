@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/lennyvong/gnobet/off-chain-agent/pkg/core/types/gnorkle"
 	"github.com/lennyvong/gnobet/off-chain-agent/pkg/core/types/sport"
@@ -31,6 +32,12 @@ func NewSport() (*Sport, error) {
 	}, nil
 }
 
+type GetOddsResponse struct {
+	Response []struct {
+		Bookmakers []sport.Bookmaker `json:"bookmakers"`
+	}
+}
+
 type GetFixturesResponse struct {
 	Response []struct {
 		Fixture sport.Fixture `json:"fixture"`
@@ -42,9 +49,18 @@ type GetFixturesResponse struct {
 	}
 }
 
-func (s *Sport) GetMatchesAtDate(date string) ([]gnorkle.MatchData, error) {
+func (s *Sport) GetMatchesAtDate(date string, day_interval string) ([]gnorkle.MatchData, error) {
+	dateTime, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse date: %w", err)
+	}
+	dayInternvalInt, err := strconv.Atoi(day_interval)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert day_interval to int: %w", err)
+	}
+	dateTime = dateTime.AddDate(0, 0, dayInternvalInt)
 	res := []gnorkle.MatchData{}
-	getMatchRes, err := utils.GetFromJsonReq[GetFixturesResponse](s.ApiUrl+"/fixtures?date="+date+"&league=39&season=2024", utils.GET, "",
+	getMatchRes, err := utils.GetFromJsonReq[GetFixturesResponse](s.ApiUrl+"/fixtures?from="+date+"&to="+dateTime.Format("2006-01-02")+"&league=39&season=2024", utils.GET, "",
 		[]utils.Header{
 			{
 				Key:   "x-rapidapi-key",
@@ -60,6 +76,7 @@ func (s *Sport) GetMatchesAtDate(date string) ([]gnorkle.MatchData, error) {
 	}
 	for _, match := range getMatchRes.Response {
 		res = append(res, gnorkle.MatchData{
+			FixtureID: strconv.Itoa(match.Fixture.ID),
 			HomeTeam: gnorkle.Team{
 				ID:   strconv.Itoa(match.Teams.HomeTeam.ID),
 				Name: match.Teams.HomeTeam.Name,
@@ -78,4 +95,26 @@ func (s *Sport) GetMatchesAtDate(date string) ([]gnorkle.MatchData, error) {
 		})
 	}
 	return res, nil
+}
+
+func (s *Sport) GetOddsOfMatch(fixtureID string) (gnorkle.OddData, error) {
+	getOddsRes, err := utils.GetFromJsonReq[GetOddsResponse](s.ApiUrl+"/odds?fixture="+fixtureID+"&bet=1", utils.GET, "",
+		[]utils.Header{
+			{
+				Key:   "x-rapidapi-key",
+				Value: s.ApiKey,
+			},
+			{
+				Key:   "x-rapidapi-host",
+				Value: "api-football-v1.p.rapidapi.com",
+			},
+		}, "")
+	if err != nil {
+		return gnorkle.OddData{}, fmt.Errorf("failed to get matches: %w", err)
+	}
+	return gnorkle.OddData{
+		FixtureID: fixtureID,
+		Bookmaker: getOddsRes.Response[0].Bookmakers[0].Name,
+		Bets:      getOddsRes.Response[0].Bookmakers[0].Bets,
+	}, nil
 }
