@@ -1,4 +1,4 @@
-package core
+package main
 
 import (
 	"log"
@@ -12,7 +12,7 @@ import (
 
 var Signer gnoclient.Signer
 
-func Main() {
+func main() {
 	// Load the .env file
 	err := godotenv.Load(".env")
 	if err != nil {

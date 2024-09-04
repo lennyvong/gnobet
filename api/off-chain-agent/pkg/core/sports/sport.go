@@ -5,5 +5,6 @@ import (
 )
 
 type Sport interface {
+	GetOddsOfMatch(fixtureID string) (gnorkle.OddData, error)
 	GetMatchesAtDate(date string, day_interval string) ([]gnorkle.MatchData, error)
 }

@@ -32,6 +32,12 @@ func NewSport() (*Sport, error) {
 	}, nil
 }
 
+type GetOddsResponse struct {
+	Response []struct {
+		Bookmakers []sport.Bookmaker `json:"bookmakers"`
+	}
+}
+
 type GetFixturesResponse struct {
 	Response []struct {
 		Fixture sport.Fixture `json:"fixture"`
@@ -70,6 +76,7 @@ func (s *Sport) GetMatchesAtDate(date string, day_interval string) ([]gnorkle.Ma
 	}
 	for _, match := range getMatchRes.Response {
 		res = append(res, gnorkle.MatchData{
+			FixtureID: strconv.Itoa(match.Fixture.ID),
 			HomeTeam: gnorkle.Team{
 				ID:   strconv.Itoa(match.Teams.HomeTeam.ID),
 				Name: match.Teams.HomeTeam.Name,
@@ -88,4 +95,26 @@ func (s *Sport) GetMatchesAtDate(date string, day_interval string) ([]gnorkle.Ma
 		})
 	}
 	return res, nil
+}
+
+func (s *Sport) GetOddsOfMatch(fixtureID string) (gnorkle.OddData, error) {
+	getOddsRes, err := utils.GetFromJsonReq[GetOddsResponse](s.ApiUrl+"/odds?fixture="+fixtureID+"&bet=1", utils.GET, "",
+		[]utils.Header{
+			{
+				Key:   "x-rapidapi-key",
+				Value: s.ApiKey,
+			},
+			{
+				Key:   "x-rapidapi-host",
+				Value: "api-football-v1.p.rapidapi.com",
+			},
+		}, "")
+	if err != nil {
+		return gnorkle.OddData{}, fmt.Errorf("failed to get matches: %w", err)
+	}
+	return gnorkle.OddData{
+		FixtureID: fixtureID,
+		Bookmaker: getOddsRes.Response[0].Bookmakers[0].Name,
+		Bets:      getOddsRes.Response[0].Bookmakers[0].Bets,
+	}, nil
 }
