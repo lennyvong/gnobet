@@ -7,6 +7,100 @@ import (
   "gno.land/p/demo/ufmt"
 )
 
+type OddData struct {
+  ID int `json:"id"`
+  MatchID int `json:"match_id"`
+  BookMakerName string `json:"name"`
+  OddsType []OddType `json:"bets"`
+
+}
+
+func oddDataFromJSON(data *json.Node, matchID int) (OddData, error) {
+  bookMakerName, err := data.MustKey("bookmaker").Value()
+  if err != nil {
+    return OddData{}, err
+  }
+	betsData, err := data.GetKey("bets")
+  if err != nil {
+    return OddData{}, err
+  }
+  oddType := []OddType{}
+  for i := 0; i < betsData.Size(); i++ {
+    node, err := betsData.GetIndex(i)
+    if err != nil {
+      return OddData{}, err
+    }
+    oddTypeData, err := oddTypeFromJSON(node)
+    if err != nil {
+      return OddData{}, err
+    }
+    oddType = append(oddType, oddTypeData)
+  }
+  return OddData{
+    BookMakerName: bookMakerName.(string),
+    MatchID: matchID,
+    OddsType: oddType,
+  }, nil
+}
+
+type OddType struct {
+  Name string `json:"name"`
+  OddsValue []OddValue `json:"values"`
+}
+
+func oddTypeFromJSON(data *json.Node) (OddType, error) {
+	name, err := data.MustKey("name").Value()
+	if err != nil {
+		return OddType{}, err
+	}
+  valuesData, err := data.GetKey("values")
+  if err != nil {
+    return OddType{}, err
+  }
+  oddData := []OddValue{}
+  for i := 0; i < valuesData.Size(); i++ {
+    node, err := valuesData.GetIndex(i)
+    if err != nil {
+      return OddType{}, err
+    }
+    oddValueData, err := oddValueFromJSON(node)
+    if err != nil {
+      return OddType{}, err
+    }
+    oddData = append(oddData, oddValueData)
+  }
+
+	return OddType{
+    Name: name.(string),
+    OddsValue: oddData,
+  }, nil
+}
+
+type OddValue struct {
+  Value string `json:"value"`
+  Odd string `json:"odd"`
+}
+
+func oddValueFromJSON(data *json.Node) (OddValue, error) {
+	value, err := data.MustKey("value").Value()
+	if err != nil {
+		return OddValue{}, err
+	}
+	odd, err := data.MustKey("odd").Value()
+	if err != nil {
+		return OddValue{}, err
+	}
+	return OddValue{
+    Value: value.(string),
+    Odd: odd.(string),
+  }, nil
+}
+
+type GnorkleEntrypointData struct {
+  Matches []MatchData `json:"matches"`
+  Odds []OddData `json:"odds"`
+}
+
 type MatchData struct {
 	ID int `json:"id"`
 	HomeTeam Team `json:"home_team"`
@@ -21,7 +115,8 @@ type MatchData struct {
 	} `json:"scores"`
 	Status Status `json:"status"`
 	Winner MatchWinner `json:"winner"`
-	Bets []Bet `json:"bets"`
+	Bettors []std.Address `json:"bettors"`
+  Odds OddData `json:"odds"`
 }
 
 type MatchWinner string
@@ -105,6 +200,7 @@ type Bet struct {
 	Amount int `json:"amount"`
 	Bet string `json:"bet"`
 	Status BetStatus `json:"status"`
+  MatchID int `json:"match_id"`
 }
 
 type BetStatus string
